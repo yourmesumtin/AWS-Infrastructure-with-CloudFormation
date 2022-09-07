@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: 2010-09-09 
+
+Description: This template creates Auto Scaling Group.
+
+Metadata:
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - 
+        Label: 
+          default: Export VPC Stack Name
+        Parameters:
+          - ExportVpcStackName
+      - 
+        Label: 
+          default: Export ALB Stack Name
+        Parameters:
+          - ExportAlbStackName
+      - 
+        Label: 
+          default: Email Address
+        Parameters:
+          - OperatorEMail
+      - 
+        Label: 
+          default: Image ID
+        Parameters:
+          - EC2ImageID
+      - 
+        Label: 
+          default: Launch Template Name
+        Parameters:
+          - WebServerLaunchTemplateName
+      - 
+        Label: 
+          default: Instance Type
+        Parameters:
+          - InstanceType
+      - 
+        Label: 
+          default: EC2 KeyPair
+        Parameters:
+          - EC2KeyName
+
+Parameters:
+  ExportVpcStackName:
+    Description: The name of the vpc stack that exports values
+    Type: String
+
+  ExportAlbStackName:
+    Description: The name of the alb stack that exports values
+    Type: String
+
+  OperatorEMail:
+    Description: A valid EMail address to notify if there are any scaling operations
+    Type: String
+
+  EC2KeyName:
+    Description: Name of an EC2 KeyPair to enable SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+
+  EC2ImageID:
+    Description: The ID of the custom AMI
+    Type: String
+
+  WebServerLaunchTemplateName:
+    AllowedPattern: '[a-zA-Z0-9\(\)\.\-/_]+'
+    ConstraintDescription: Must be unique to this account. Max 128 chars. No spaces or special characters like '&', '*', '@'.
+    Default: Yourme-Server-Launch-Template
+    Description: Name of launch template
+    Type: String
+
+  InstanceType:
+    Description: WebServers EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t1.micro
+      - t2.nano
+      - t2.micro
+      - t2.small
+    ConstraintDescription: Must be a valid EC2 instance type.
+
+Resources:
+  WebServerLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Ref WebServerLaunchTemplateName
+      LaunchTemplateData:
+        ImageId: !Ref EC2ImageID
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref EC2KeyName
+        Monitoring:
+          Enabled: true
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${ExportVpcStackName}-WebServerSecurityGroup
+
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref OperatorEMail
+          Protocol: email
+
+  WebServerAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: Lamp Auto Scaling Group
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub ${ExportVpcStackName}-PrivateSubnet1
+        - Fn::ImportValue: !Sub ${ExportVpcStackName}-PrivateSubnet2
+      HealthCheckGracePeriod: 300
+      HealthCheckType: ELB
+      LaunchTemplate:
+        LaunchTemplateName: !Ref WebServerLaunchTemplateName
+        Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
+      MinSize: 1
+      MaxSize: 4
+      DesiredCapacity: 2
+      Tags:
+        - Key: Name
+          Value: AS-WebServer
+          PropagateAtLaunch: true
+      TargetGroupARNs:
+        - Fn::ImportValue: !Sub ${ExportAlbStackName}-ALBTargetGroup
+      NotificationConfiguration:
+        TopicARN: !Ref NotificationTopic
+        NotificationTypes:
+          - 'autoscaling:EC2_INSTANCE_LAUNCH'
+          - 'autoscaling:EC2_INSTANCE_LAUNCH_ERROR'
+          - 'autoscaling:EC2_INSTANCE_TERMINATE'
+          - 'autoscaling:EC2_INSTANCE_TERMINATE_ERROR'
+  
+  WebServerScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref WebServerAutoScalingGroup
+      Cooldown: 60
+      ScalingAdjustment: 1
+
+  WebServerScaleDownPolicy:
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref WebServerAutoScalingGroup
+      Cooldown: 60
+      ScalingAdjustment: -1
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 90% for 10 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 90
+      AlarmActions:
+        - !Ref WebServerScaleUpPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref WebServerAutoScalingGroup
+      ComparisonOperator: GreaterThanThreshold
+
+  CPUAlarmLow:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmDescription: Scale-down if CPU < 70% for 10 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 70
+      AlarmActions:
+        - !Ref WebServerScaleDownPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref WebServerAutoScalingGroup
+      ComparisonOperator: LessThanThreshold

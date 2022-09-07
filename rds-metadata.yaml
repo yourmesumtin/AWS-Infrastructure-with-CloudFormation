@@ -1,0 +1,20 @@
+Metadata:
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - 
+        Label: 
+          default: Export VPC Stack Name
+        Parameters:
+          - ExportVpcStackName
+      - 
+        Label: 
+          default: Database Parameters
+        Parameters:
+          - DatabaseInstanceIdentifier
+          - DatabaseName
+          - DatabaseUser
+          - DatabasePassword
+          - DatabaseBackupRetentionPeriod
+          - DatabaseAllocatedStorage
+          - DatabaseInstanceClass
+          - MultiAZDatabase

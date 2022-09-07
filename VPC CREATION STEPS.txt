@@ -1,0 +1,22 @@
+CREATING     A     VPC
+
+1. Select the Region
+2. Create VPC
+    -10.0.0.0/16
+3. Enable DNS Host Name in the VPC
+    -Navigate to actions and edit DNS host name
+4. Create Internet Gateway
+5. Attach the Internet Gateway to the VPC
+    -Navigate to actions and attach VPC
+6. Create the Public Subnets
+    -10.0.0.0/24
+7. Enable Auto Assign IP Settings
+    -click public subnet box and navigate to actions then click edit 
+      subnet settings
+8. Create Public Route Table
+9.  Add Public Route to the Public Route Table
+    -Navigate to edit route and add route
+10.Associate the Public Subnets with the Public Route Table
+    -select the subnet associations tab
+11.Create the Private Subnets
+     -10.0.1.0/24

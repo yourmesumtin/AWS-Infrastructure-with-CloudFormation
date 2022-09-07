@@ -1,0 +1,38 @@
+Metadata:
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - 
+        Label: 
+          default: Export VPC Stack Name
+        Parameters:
+          - ExportVpcStackName
+      - 
+        Label: 
+          default: Export ALB Stack Name
+        Parameters:
+          - ExportAlbStackName
+      - 
+        Label: 
+          default: Email Address
+        Parameters:
+          - OperatorEMail
+      - 
+        Label: 
+          default: Image ID
+        Parameters:
+          - EC2ImageID
+      - 
+        Label: 
+          default: Launch Template Name
+        Parameters:
+          - WebServerLaunchTemplateName
+      - 
+        Label: 
+          default: Instance Type
+        Parameters:
+          - InstanceType
+      - 
+        Label: 
+          default: EC2 KeyPair
+        Parameters:
+          - EC2KeyName

@@ -1,0 +1,39 @@
+Parameters:
+  ExportVpcStackName:
+    Description: The name of the vpc stack that exports values
+    Type: String
+
+  ExportAlbStackName:
+    Description: The name of the alb stack that exports values
+    Type: String
+
+  OperatorEMail:
+    Description: A valid EMail address to notify if there are any scaling operations
+    Type: String
+
+  EC2KeyName:
+    Description: Name of an EC2 KeyPair to enable SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+
+  EC2ImageID:
+    Description: The ID of the custom AMI
+    Type: String
+
+  WebServerLaunchTemplateName:
+    AllowedPattern: '[a-zA-Z0-9\(\)\.\-/_]+'
+    ConstraintDescription: Must be unique to this account. Max 128 chars. No spaces or special characters like '&', '*', '@'.
+    Default: Lamp-Server-Launch-Template
+    Description: Name of launch template
+    Type: String
+
+  InstanceType:
+    Description: WebServers EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t1.micro
+      - t2.nano
+      - t2.micro
+      - t2.small
+    ConstraintDescription: Must be a valid EC2 instance type.

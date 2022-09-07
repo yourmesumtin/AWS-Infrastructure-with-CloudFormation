@@ -1,0 +1,97 @@
+Resources:
+  WebServerLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName:
+      LaunchTemplateData:
+        ImageId:
+        InstanceType:
+        KeyName:
+        Monitoring:
+          Enabled: true
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${ExportVpcStackName}-WebServerSecurityGroup
+
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint:
+          Protocol:
+
+  WebServerAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName:
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub ${ExportVpcStackName}-PrivateSubnet1
+        - Fn::ImportValue: !Sub ${ExportVpcStackName}-PrivateSubnet2
+      HealthCheckGracePeriod:
+      HealthCheckType:
+      LaunchTemplate:
+        LaunchTemplateName:
+        Version:
+      MinSize: 
+      MaxSize: 
+      DesiredCapacity:
+      Tags:
+        - Key:
+          Value:
+          PropagateAtLaunch:
+      TargetGroupARNs:
+        - Fn::ImportValue: !Sub ${ExportAlbStackName}-ALBTargetGroup
+      NotificationConfiguration:
+        TopicARN:
+        NotificationTypes:
+          - 'autoscaling:EC2_INSTANCE_LAUNCH'
+          - 'autoscaling:EC2_INSTANCE_LAUNCH_ERROR'
+          - 'autoscaling:EC2_INSTANCE_TERMINATE'
+          - 'autoscaling:EC2_INSTANCE_TERMINATE_ERROR'
+  
+  WebServerScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName:
+      Cooldown:
+      ScalingAdjustment:
+
+  WebServerScaleDownPolicy:
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName:
+      Cooldown:
+      ScalingAdjustment:
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 90% for 10 minutes
+      MetricName: CPUUtilization
+      Namespace: 
+      Statistic: 
+      Period: 
+      EvaluationPeriods: 
+      Threshold: 
+      AlarmActions:
+      Dimensions:
+        - Name:
+          Value:
+      ComparisonOperator: GreaterThanThreshold
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 70% for 10 minutes
+      MetricName: CPUUtilization
+      Namespace: 
+      Statistic: 
+      Period:
+      EvaluationPeriods:
+      Threshold:
+      AlarmActions:
+      Dimensions:
+        - Name:
+          Value:
+      ComparisonOperator:

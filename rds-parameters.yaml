@@ -1,0 +1,79 @@
+Parameters:
+  ExportVpcStackName:
+    Description: The name of the vpc stack that exports values
+    Type: String
+
+  DatabaseInstanceIdentifier:
+    AllowedPattern:
+    ConstraintDescription:
+    Default:
+    Description:
+    MaxLength:
+    MinLength:
+    Type:
+
+  DatabaseName:
+    AllowedPattern: 
+    ConstraintDescription:
+    Default:
+    Description:
+    MaxLength:
+    MinLength:
+    Type:
+
+  DatabaseUser:
+    AllowedPattern:
+    ConstraintDescription:
+    Default:
+    Description:
+    MaxLength:
+    MinLength:
+    NoEcho:
+    Type:
+
+  DatabasePassword:
+    AllowedPattern:
+    ConstraintDescription:
+    Default:
+    Description:
+    MaxLength:
+    MinLength:
+    NoEcho:
+    Type:
+
+  DatabaseBackupRetentionPeriod:
+    ConstraintDescription:
+    Default:
+    Description:
+    MaxValue:
+    MinValue:
+    Type:
+
+  DatabaseAllocatedStorage:
+    ConstraintDescription:
+    Default:
+    Description:
+    MaxValue:
+    MinValue:
+    Type:
+
+  DatabaseInstanceClass:
+    AllowedValues:
+      - db.t1.micro
+      - db.t2.micro
+      - db.m1.small
+      - db.m1.medium
+      - db.m1.large
+    ConstraintDescription:
+    Default:
+    Description:
+    Type:
+
+  MultiAZDatabase:
+    AllowedValues:
+      - true
+      - false
+    ConstraintDescription: 
+    Default:
+    Description:
+    Type:

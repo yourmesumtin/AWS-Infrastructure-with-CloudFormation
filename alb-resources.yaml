@@ -1,0 +1,53 @@
+Resources:
+#Create an Application Load Balancer
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name:
+      SecurityGroups:
+      Subnets: 
+
+#Create a Listener on Port 80
+  ALBListenerNoSslCertificate:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - RedirectConfig:
+            Host: '#{host}'
+            Path: '/#{path}'
+            Port: '443'
+            Protocol: HTTPS
+            StatusCode: HTTP_301
+          Type: 
+      LoadBalancerArn:
+      Port:
+      Protocol:
+
+#Create a Listener on Port 443
+  ALBListenerSslCertificate:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn:
+      DefaultActions:
+        - Type:
+          TargetGroupArn:
+      LoadBalancerArn:
+      Port:
+      Protocol:
+
+# Create a Target Group
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds:
+      HealthCheckPath: 
+      HealthCheckTimeoutSeconds: 
+      HealthyThresholdCount:
+      Matcher:
+        HttpCode: 
+      Name:
+      Port:
+      Protocol:
+      UnhealthyThresholdCount:
+      VpcId:
